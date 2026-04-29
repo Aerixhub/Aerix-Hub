@@ -1,1 +1,713 @@
-AerixHub.lua
+local player = game.Players.LocalPlayer
+local UIS = game:GetService("UserInputService")
+
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local TweenService = game:GetService("TweenService")
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0,600,0,350)
+main.Position = UDim2.new(0.5,-300,0.5,-175)
+main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+Instance.new("UICorner", main).CornerRadius = UDim.new(0,10)
+
+local topbar = Instance.new("Frame", main)
+topbar.Size = UDim2.new(1,0,0,40)
+topbar.BackgroundColor3 = Color3.fromRGB(255,255,255) -- putih tipis
+topbar.BackgroundTransparency = 0.9
+
+local title = Instance.new("TextLabel", topbar)
+title.Size = UDim2.new(1,0,1,0)
+title.Text = "AERIX HUB | SCRIPT HUB"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+
+topbar.Active = true
+topbar.Selectable = true
+
+local dragging = false
+local dragInput
+local dragStart
+local startPos
+
+topbar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 
+	or input.UserInputType == Enum.UserInputType.Touch then
+		
+		dragging = true
+		dragStart = input.Position
+		startPos = main.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+topbar.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement 
+	or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		
+		main.Position = UDim2.new(
+			startPos.X.Scale,
+			startPos.X.Offset + delta.X,
+			startPos.Y.Scale,
+			startPos.Y.Offset + delta.Y
+		)
+	end
+end)
+
+UIS.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
+
+local sidebar = Instance.new("Frame", main)
+sidebar.Size = UDim2.new(0,150,1,-40)
+sidebar.Position = UDim2.new(0,0,0,40)
+sidebar.BackgroundColor3 = Color3.fromRGB(10,10,10)
+
+local logoBottom = Instance.new("ImageLabel", sidebar)
+logoBottom.Size = UDim2.new(0,100,0,100)
+logoBottom.Position = UDim2.new(0.5,-50,1,-110) -- bawah
+logoBottom.BackgroundTransparency = 1
+logoBottom.Image = "rbxassetid://104831640013971"
+
+local content = Instance.new("Frame", main)
+content.Position = UDim2.new(0,160,0,50)
+content.Size = UDim2.new(1,-170,1,-60)
+content.BackgroundColor3 = Color3.fromRGB(20,20,20)
+Instance.new("UICorner", content).CornerRadius = UDim.new(0,10)
+
+local accent = Instance.new("Frame", main)
+accent.Size = UDim2.new(1,0,0,2)
+accent.Position = UDim2.new(0,0,0,40)
+accent.BackgroundColor3 = Color3.fromRGB(0,100,255)
+
+local menu = {"Aim","ESP","Misc","Setting"}
+local pages = {}
+
+local function createPage(name)
+	local page = Instance.new("Frame", content)
+	page.Size = UDim2.new(1,0,1,0)
+	page.BackgroundTransparency = 1
+	page.Visible = false
+	pages[name] = page
+	return page
+end
+
+local function showPage(name)
+	for _,p in pairs(pages) do
+		p.Visible = false
+	end
+	pages[name].Visible = true
+end
+
+for i,name in pairs(menu) do
+	local btn = Instance.new("TextButton", sidebar)
+	btn.Size = UDim2.new(1,-10,0,40)
+	btn.Position = UDim2.new(0,5,0,(i-1)*45)
+	btn.Text = name
+	btn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+	btn.TextColor3 = Color3.fromRGB(255,255,255)
+	Instance.new("UICorner", btn)
+
+	local page = createPage(name)
+
+	btn.MouseButton1Click:Connect(function()
+		showPage(name)
+	end)
+end
+
+showPage("Aimbot")
+
+local currentColor = Color3.fromRGB(120,0,180)
+
+local function applyTheme(color)
+	currentColor = color
+	accent.BackgroundColor3 = color
+end
+
+local settingPage = pages["Setting"]
+
+local dropdownBtn = Instance.new("TextButton", settingPage)
+dropdownBtn.Size = UDim2.new(0,200,0,40)
+dropdownBtn.Position = UDim2.new(0,20,0,20)
+dropdownBtn.Text = "Change Color"
+dropdownBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+dropdownBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
+local dropFrame = Instance.new("Frame", settingPage)
+dropFrame.Size = UDim2.new(0,200,0,0)
+dropFrame.Position = UDim2.new(0,20,0,60)
+dropFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+dropFrame.ClipsDescendants = true
+
+local opened = false
+
+dropdownBtn.MouseButton1Click:Connect(function()
+	opened = not opened
+	if opened then
+		dropFrame.Size = UDim2.new(0,200,0,200)
+	else
+		dropFrame.Size = UDim2.new(0,200,0,0)
+	end
+end)
+
+local colors = {
+	{"Red", Color3.fromRGB(255,0,0)},
+	{"Blue", Color3.fromRGB(0,100,255)},
+	{"Purple", Color3.fromRGB(120,0,180)},
+	{"Pink", Color3.fromRGB(255,105,180)},
+	{"Orange", Color3.fromRGB(255,140,0)},
+	{"Yellow", Color3.fromRGB(255,255,0)},
+}
+
+for i,data in ipairs(colors) do
+	local item = Instance.new("TextButton", dropFrame)
+	item.Size = UDim2.new(1,0,0,30)
+	item.Position = UDim2.new(0,0,0,(i-1)*30)
+	item.Text = data[1]
+	item.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	item.TextColor3 = Color3.fromRGB(255,255,255)
+
+	-- COLOR ICON
+	local colorBox = Instance.new("Frame", item)
+	colorBox.Size = UDim2.new(0,20,0,20)
+	colorBox.Position = UDim2.new(0,5,0.5,-10)
+	colorBox.BackgroundColor3 = data[2]
+
+	item.MouseButton1Click:Connect(function()
+		applyTheme(data[2])
+	end)
+end
+
+main.Size = UDim2.new(0,0,0,0)
+TweenService:Create(main, TweenInfo.new(0.4), {
+	Size = UDim2.new(0,600,0,350)
+}):Play()
+
+local btnMin = Instance.new("TextButton", topbar)
+btnMin.Size = UDim2.new(0,30,0,30)
+btnMin.Position = UDim2.new(1,-35,0,5)
+btnMin.Text = "-"
+btnMin.BackgroundColor3 = Color3.fromRGB(40,40,40)
+btnMin.TextColor3 = Color3.fromRGB(255,255,255)
+
+local minimized = false
+
+btnMin.MouseButton1Click:Connect(function()
+	if not minimized then
+		minimized = true
+		
+		TweenService:Create(sidebar, TweenInfo.new(0.2), {
+	BackgroundTransparency = 1
+}):Play()
+
+       TweenService:Create(content, TweenInfo.new(0.2), {
+       	BackgroundTransparency = 1
+       }):Play()
+
+       task.wait(0.2)
+       sidebar.Visible = false
+       content.Visible = false
+		
+		TweenService:Create(main, TweenInfo.new(0.3), {
+			Size = UDim2.new(0,600,0,40)
+		}):Play()
+		
+		btnMin.Text = "[]"
+		
+	else
+		minimized = false
+		
+		sidebar.Visible = true
+        content.Visible = true
+
+        sidebar.BackgroundTransparency = 1
+        content.BackgroundTransparency = 1
+
+       TweenService:Create(sidebar, TweenInfo.new(0.2), {
+	       BackgroundTransparency = 0
+       }):Play()
+
+       TweenService:Create(content, TweenInfo.new(0.2), {
+            BackgroundTransparency = 0
+       }):Play()
+
+		TweenService:Create(main, TweenInfo.new(0.3), {
+			Size = UDim2.new(0,600,0,350)
+		}):Play()
+		
+		btnMin.Text = "-"
+	end
+end)
+
+-- ===============================
+-- ESP
+-- ===============================
+local espPage = pages["ESP"]
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Camera = workspace.CurrentCamera
+local LP = Players.LocalPlayer
+
+for _,v in pairs(espPage:GetChildren()) do
+	v:Destroy()
+end
+
+--========================
+-- CONFIG
+--========================
+local espEnabled = false
+
+local drawOpt = {
+	Box = true,
+	Line = true,
+	Name = true,
+	Distance = true,
+	Health = true,
+	Highlight = true,
+	Skeleton = true
+}
+
+local setOpt = {
+	MaxDistance = 600,
+	LineMode = "Bottom",
+	HPMode = "Side"
+}
+
+local colorOpt = {
+	Box = Color3.fromRGB(255,255,255),
+	Line = Color3.fromRGB(255,255,255),
+	Name = Color3.fromRGB(255,255,255),
+	Distance = Color3.fromRGB(255,255,255),
+	Skeleton = Color3.fromRGB(255,255,255),
+	Highlight = Color3.fromRGB(255,255,255)
+}
+
+local cache = {}
+
+--========================
+-- UI
+--========================
+local scroll = Instance.new("ScrollingFrame", espPage)
+scroll.Size = UDim2.new(1,-10,1,-10)
+scroll.Position = UDim2.new(0,5,0,5)
+scroll.CanvasSize = UDim2.new(0,0,0,1200)
+scroll.ScrollBarThickness = 4
+scroll.BackgroundTransparency = 1
+scroll.BorderSizePixel = 0
+
+local function btn(parent,text,y)
+	local b = Instance.new("TextButton", parent)
+	b.Size = UDim2.new(0,260,0,34)
+	b.Position = UDim2.new(0,10,0,y)
+	b.BackgroundColor3 = Color3.fromRGB(28,28,28)
+	b.TextColor3 = Color3.new(1,1,1)
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.Text = text
+	Instance.new("UICorner", b)
+	return b
+end
+
+-- ENABLE
+local enable = btn(scroll,"[ ] Enable ESP",10)
+enable.MouseButton1Click:Connect(function()
+	espEnabled = not espEnabled
+	enable.Text = (espEnabled and "[✓] " or "[ ] ").."Enable ESP"
+end)
+
+-- DRAW MENU
+local drawOpen = false
+local drawBtn = btn(scroll,"ESP Draw ▶",55)
+
+local drawFrame = Instance.new("Frame",scroll)
+drawFrame.Size = UDim2.new(0,260,0,0)
+drawFrame.Position = UDim2.new(0,10,0,92)
+drawFrame.BackgroundTransparency = 1
+drawFrame.ClipsDescendants = true
+
+local setBtn
+local setFrame
+
+local function updateLayout()
+	drawFrame.Size = drawOpen and UDim2.new(0,260,0,245) or UDim2.new(0,260,0,0)
+
+	local y = drawOpen and 345 or 100
+	setBtn.Position = UDim2.new(0,10,0,y)
+	setFrame.Position = UDim2.new(0,10,0,y+37)
+end
+
+drawBtn.MouseButton1Click:Connect(function()
+	drawOpen = not drawOpen
+	drawBtn.Text = drawOpen and "ESP Draw ▼" or "ESP Draw ▶"
+	updateLayout()
+end)
+
+local function toggleDraw(name,pos,key)
+	local b = btn(drawFrame,"",pos)
+
+	local function refresh()
+		b.Text = (drawOpt[key] and "[✓] " or "[ ] ")..name
+	end
+	refresh()
+
+	b.MouseButton1Click:Connect(function()
+		drawOpt[key] = not drawOpt[key]
+		refresh()
+	end)
+end
+
+toggleDraw("ESP Box",0,"Box")
+toggleDraw("ESP Line",35,"Line")
+toggleDraw("ESP Name",70,"Name")
+toggleDraw("ESP Distance",105,"Distance")
+toggleDraw("ESP Health",140,"Health")
+toggleDraw("ESP Highlight",175,"Highlight")
+toggleDraw("ESP Skeleton",210,"Skeleton")
+
+-- SETTINGS
+setBtn = btn(scroll,"ESP Setting ▶",100)
+
+setFrame = Instance.new("Frame",scroll)
+setFrame.Size = UDim2.new(0,260,0,0)
+setFrame.Position = UDim2.new(0,10,0,137)
+setFrame.BackgroundTransparency = 1
+setFrame.ClipsDescendants = true
+
+local setOpen = false
+
+setBtn.MouseButton1Click:Connect(function()
+	setOpen = not setOpen
+	setBtn.Text = setOpen and "ESP Setting ▼" or "ESP Setting ▶"
+	setFrame.Size = setOpen and UDim2.new(0,260,0,260) or UDim2.new(0,260,0,0)
+end)
+
+local lineMode = btn(setFrame,"Line Mode : Bottom",0)
+lineMode.MouseButton1Click:Connect(function()
+	setOpt.LineMode = setOpt.LineMode=="Bottom" and "Top" or "Bottom"
+	lineMode.Text = "Line Mode : "..setOpt.LineMode
+end)
+
+local hpMode = btn(setFrame,"HP Bar : Side",40)
+hpMode.MouseButton1Click:Connect(function()
+	setOpt.HPMode = setOpt.HPMode=="Side" and "Top" or "Side"
+	hpMode.Text = "HP Bar : "..setOpt.HPMode
+end)
+
+local maxBtn = btn(setFrame,"Max Distance : 600",80)
+maxBtn.MouseButton1Click:Connect(function()
+	if setOpt.MaxDistance == 600 then
+		setOpt.MaxDistance = 1000
+	else
+		setOpt.MaxDistance = 600
+	end
+	maxBtn.Text = "Max Distance : "..setOpt.MaxDistance
+end)
+
+--========================
+-- CREATE ESP
+--========================
+local function createESP(plr)
+	if plr == LP then return end
+	if cache[plr] then return end
+
+	local d = {
+		box = Drawing.new("Square"),
+		line = Drawing.new("Line"),
+		name = Drawing.new("Text"),
+		dist = Drawing.new("Text"),
+		hp = Drawing.new("Square"),
+		skel = {}
+	}
+
+	d.box.Filled = false
+	d.box.Thickness = 2
+
+	d.line.Thickness = 2
+	d.hp.Filled = true
+
+	for _,t in pairs({d.name,d.dist}) do
+		t.Size = 13
+		t.Center = true
+		t.Outline = true
+	end
+
+	for i=1,14 do
+		local l = Drawing.new("Line")
+		l.Thickness = 2
+		table.insert(d.skel,l)
+	end
+
+	cache[plr] = d
+end
+
+for _,p in pairs(Players:GetPlayers()) do
+	createESP(p)
+end
+
+Players.PlayerAdded:Connect(createESP)
+
+local function hide(d)
+	for _,v in pairs({d.box,d.line,d.name,d.dist,d.hp}) do
+		v.Visible = false
+	end
+	for _,l in pairs(d.skel) do
+		l.Visible = false
+	end
+end
+
+local function bone(char,a,b,line,col)
+	local p1 = char:FindFirstChild(a)
+	local p2 = char:FindFirstChild(b)
+
+	if p1 and p2 then
+		local v1,on1 = Camera:WorldToViewportPoint(p1.Position)
+		local v2,on2 = Camera:WorldToViewportPoint(p2.Position)
+
+		if on1 and on2 then
+			line.Visible = true
+			line.From = Vector2.new(v1.X,v1.Y)
+			line.To = Vector2.new(v2.X,v2.Y)
+			line.Color = col
+			return
+		end
+	end
+
+	line.Visible = false
+end
+
+--========================
+-- LOOP
+--========================
+RunService.RenderStepped:Connect(function()
+
+	for plr,d in pairs(cache) do
+
+		local char = plr.Character
+		local hum = char and char:FindFirstChildOfClass("Humanoid")
+		local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+		if espEnabled and char and hum and hrp and hum.Health > 0 and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+
+			local dist = (LP.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+
+			if dist <= setOpt.MaxDistance then
+
+				local pos,vis = Camera:WorldToViewportPoint(hrp.Position)
+
+				if vis then
+
+					local size = math.clamp(2200/dist,18,140)
+
+					-- BOX
+					d.box.Visible = drawOpt.Box
+					d.box.Size = Vector2.new(size,size*1.5)
+					d.box.Position = Vector2.new(pos.X-size/2,pos.Y-size*0.75)
+					d.box.Color = colorOpt.Box
+
+					-- LINE
+					d.line.Visible = drawOpt.Line
+					d.line.From = setOpt.LineMode=="Top"
+						and Vector2.new(Camera.ViewportSize.X/2,0)
+						or Vector2.new(Camera.ViewportSize.X/2,Camera.ViewportSize.Y)
+
+					d.line.To = Vector2.new(pos.X,pos.Y)
+					d.line.Color = colorOpt.Line
+
+					-- NAME
+					d.name.Visible = drawOpt.Name
+					d.name.Text = plr.Name
+					d.name.Position = Vector2.new(pos.X,pos.Y-size)
+					d.name.Color = colorOpt.Name
+
+					-- DISTANCE
+					d.dist.Visible = drawOpt.Distance
+					d.dist.Text = math.floor(dist).."m"
+					d.dist.Position = Vector2.new(pos.X,pos.Y+size)
+					d.dist.Color = colorOpt.Distance
+
+					-- HP BAR
+					local hp = hum.Health / hum.MaxHealth
+					local hpColor = Color3.fromRGB(0,255,0)
+
+					if hp <= 0.5 then
+						hpColor = Color3.fromRGB(255,255,0)
+					end
+					if hp <= 0.25 then
+						hpColor = Color3.fromRGB(255,0,0)
+					end
+
+					d.hp.Visible = drawOpt.Health
+					d.hp.Color = hpColor
+
+					if setOpt.HPMode == "Side" then
+						d.hp.Size = Vector2.new(4,(size*1.5)*hp)
+						d.hp.Position = Vector2.new(pos.X-size/2-6,pos.Y+size*0.75-d.hp.Size.Y)
+					else
+						d.hp.Size = Vector2.new(size*hp,4)
+						d.hp.Position = Vector2.new(pos.X-size/2,pos.Y-size*0.85)
+					end
+
+					-- HIGHLIGHT
+					if drawOpt.Highlight then
+						if not char:FindFirstChild("ESP_H") then
+							local h = Instance.new("Highlight",char)
+							h.Name = "ESP_H"
+							h.FillTransparency = 0.6
+						end
+
+						char.ESP_H.Enabled = true
+						char.ESP_H.FillColor = colorOpt.Highlight
+						char.ESP_H.OutlineColor = colorOpt.Highlight
+					else
+						if char:FindFirstChild("ESP_H") then
+							char.ESP_H.Enabled = false
+						end
+					end
+
+					-- SKELETON
+					if drawOpt.Skeleton then
+						bone(char,"Head","UpperTorso",d.skel[1],colorOpt.Skeleton)
+						bone(char,"UpperTorso","LowerTorso",d.skel[2],colorOpt.Skeleton)
+
+						bone(char,"UpperTorso","LeftUpperArm",d.skel[3],colorOpt.Skeleton)
+						bone(char,"LeftUpperArm","LeftLowerArm",d.skel[4],colorOpt.Skeleton)
+						bone(char,"LeftLowerArm","LeftHand",d.skel[5],colorOpt.Skeleton)
+
+						bone(char,"UpperTorso","RightUpperArm",d.skel[6],colorOpt.Skeleton)
+						bone(char,"RightUpperArm","RightLowerArm",d.skel[7],colorOpt.Skeleton)
+						bone(char,"RightLowerArm","RightHand",d.skel[8],colorOpt.Skeleton)
+
+						bone(char,"LowerTorso","LeftUpperLeg",d.skel[9],colorOpt.Skeleton)
+						bone(char,"LeftUpperLeg","LeftLowerLeg",d.skel[10],colorOpt.Skeleton)
+						bone(char,"LeftLowerLeg","LeftFoot",d.skel[11],colorOpt.Skeleton)
+
+						bone(char,"LowerTorso","RightUpperLeg",d.skel[12],colorOpt.Skeleton)
+						bone(char,"RightUpperLeg","RightLowerLeg",d.skel[13],colorOpt.Skeleton)
+						bone(char,"RightLowerLeg","RightFoot",d.skel[14],colorOpt.Skeleton)
+					else
+						for _,l in pairs(d.skel) do
+							l.Visible = false
+						end
+					end
+
+				else
+					hide(d)
+				end
+			else
+				hide(d)
+			end
+		else
+			hide(d)
+		end
+	end
+end)
+
+-- ==============================
+-- AIM
+-- ==============================
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local Camera = workspace.CurrentCamera
+
+local AimAssist = {
+	Enabled = true,
+	Strength = 0.35, -- makin besar makin kuat
+	MaxDistance = 300,
+	TargetPart = "Head",
+	VisibleOnly = true,
+	TeamCheck = true
+}
+
+local function isVisible(part)
+	local origin = Camera.CFrame.Position
+	local dir = part.Position - origin
+
+	local params = RaycastParams.new()
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+	params.FilterDescendantsInstances = {LP.Character}
+
+	local hit = workspace:Raycast(origin, dir, params)
+
+	if hit then
+		return hit.Instance:IsDescendantOf(part.Parent)
+	end
+
+	return true
+end
+
+local function getClosestTarget()
+	local best = nil
+	local bestDist = math.huge
+
+	for _,plr in pairs(Players:GetPlayers()) do
+		if plr ~= LP and plr.Character and plr.Character:FindFirstChild(AimAssist.TargetPart) then
+			
+			if AimAssist.TeamCheck and plr.Team == LP.Team then
+				continue
+			end
+
+			local part = plr.Character[AimAssist.TargetPart]
+			local hum = plr.Character:FindFirstChildOfClass("Humanoid")
+			local hrp = plr.Character:FindFirstChild("HumanoidRootPart")
+
+			if hum and hum.Health > 0 and hrp and LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") then
+				
+				local worldDist = (LP.Character.HumanoidRootPart.Position - hrp.Position).Magnitude
+				if worldDist <= AimAssist.MaxDistance then
+					
+					if AimAssist.VisibleOnly and not isVisible(part) then
+						continue
+					end
+
+					local pos, onscreen = Camera:WorldToViewportPoint(part.Position)
+					if onscreen then
+						local center = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)
+						local mag = (Vector2.new(pos.X,pos.Y) - center).Magnitude
+
+						if mag < bestDist then
+							bestDist = mag
+							best = part
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return best
+end
+
+RunService.RenderStepped:Connect(function()
+	if not AimAssist.Enabled then return end
+
+	local target = getClosestTarget()
+	if target then
+		local desired = CFrame.new(Camera.CFrame.Position, target.Position)
+		Camera.CFrame = Camera.CFrame:Lerp(desired, AimAssist.Strength)
+	end
+end)
+
+game.Players.PlayerAdded:Connect(function(plr)
+	plr.CharacterAdded:Connect(function()
+		if espEnabled then
+			task.wait(1)
+		end
+	end)
+end)
