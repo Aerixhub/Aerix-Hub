@@ -1,15 +1,18 @@
 local player = game.Players.LocalPlayer
 local UIS = game:GetService("UserInputService")
 
+-- GUI
 local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
 local TweenService = game:GetService("TweenService")
 
+-- MAIN
 local main = Instance.new("Frame", gui)
 main.Size = UDim2.new(0,600,0,350)
 main.Position = UDim2.new(0.5,-300,0.5,-175)
 main.BackgroundColor3 = Color3.fromRGB(15,15,15)
 Instance.new("UICorner", main).CornerRadius = UDim.new(0,10)
 
+-- ===== TOP BAR (DRAG AREA) =====
 local topbar = Instance.new("Frame", main)
 topbar.Size = UDim2.new(1,0,0,40)
 topbar.BackgroundColor3 = Color3.fromRGB(255,255,255) -- putih tipis
@@ -23,6 +26,7 @@ title.BackgroundTransparency = 1
 title.Font = Enum.Font.GothamBold
 title.TextSize = 16
 
+-- DRAG SYSTEM (FIX)
 topbar.Active = true
 topbar.Selectable = true
 
@@ -73,28 +77,34 @@ UIS.InputEnded:Connect(function(input)
 	end
 end)
 
+-- ===== SIDEBAR =====
 local sidebar = Instance.new("Frame", main)
 sidebar.Size = UDim2.new(0,150,1,-40)
 sidebar.Position = UDim2.new(0,0,0,40)
 sidebar.BackgroundColor3 = Color3.fromRGB(10,10,10)
 
+-- ===== LOGO =====
 local logoBottom = Instance.new("ImageLabel", sidebar)
 logoBottom.Size = UDim2.new(0,100,0,100)
 logoBottom.Position = UDim2.new(0.5,-50,1,-110) -- bawah
 logoBottom.BackgroundTransparency = 1
 logoBottom.Image = "rbxassetid://104831640013971"
+logoBottom.BackgroundTransparency = 1
 
+-- ===== CONTENT =====
 local content = Instance.new("Frame", main)
 content.Position = UDim2.new(0,160,0,50)
 content.Size = UDim2.new(1,-170,1,-60)
 content.BackgroundColor3 = Color3.fromRGB(20,20,20)
 Instance.new("UICorner", content).CornerRadius = UDim.new(0,10)
 
+-- ===== ACCENT LINE =====
 local accent = Instance.new("Frame", main)
 accent.Size = UDim2.new(1,0,0,2)
 accent.Position = UDim2.new(0,0,0,40)
 accent.BackgroundColor3 = Color3.fromRGB(0,100,255)
 
+-- ===== MENU =====
 local menu = {"Aim","ESP","Misc","Setting"}
 local pages = {}
 
@@ -132,6 +142,7 @@ end
 
 showPage("Aimbot")
 
+-- ===== COLOR SYSTEM =====
 local currentColor = Color3.fromRGB(120,0,180)
 
 local function applyTheme(color)
@@ -139,6 +150,7 @@ local function applyTheme(color)
 	accent.BackgroundColor3 = color
 end
 
+-- ===== MODERN COLOR MENU =====
 local settingPage = pages["Setting"]
 
 local dropdownBtn = Instance.new("TextButton", settingPage)
@@ -193,11 +205,13 @@ for i,data in ipairs(colors) do
 	end)
 end
 
+-- ===== ANIMASI MASUK =====
 main.Size = UDim2.new(0,0,0,0)
 TweenService:Create(main, TweenInfo.new(0.4), {
 	Size = UDim2.new(0,600,0,350)
 }):Play()
 
+-- ===== MINIMIZE / RESTORE =====
 local btnMin = Instance.new("TextButton", topbar)
 btnMin.Size = UDim2.new(0,30,0,30)
 btnMin.Position = UDim2.new(1,-35,0,5)
@@ -211,6 +225,7 @@ btnMin.MouseButton1Click:Connect(function()
 	if not minimized then
 		minimized = true
 		
+		-- sembunyikan isi UI
 		TweenService:Create(sidebar, TweenInfo.new(0.2), {
 	BackgroundTransparency = 1
 }):Play()
@@ -223,15 +238,18 @@ btnMin.MouseButton1Click:Connect(function()
        sidebar.Visible = false
        content.Visible = false
 		
+		-- animasi kecil (title bar doang)
 		TweenService:Create(main, TweenInfo.new(0.3), {
 			Size = UDim2.new(0,600,0,40)
 		}):Play()
 		
+		-- tombol jadi restore
 		btnMin.Text = "[]"
 		
 	else
 		minimized = false
 		
+		-- munculin isi lagi
 		sidebar.Visible = true
         content.Visible = true
 
@@ -246,10 +264,12 @@ btnMin.MouseButton1Click:Connect(function()
             BackgroundTransparency = 0
        }):Play()
 
+		-- balikin ukuran normal
 		TweenService:Create(main, TweenInfo.new(0.3), {
 			Size = UDim2.new(0,600,0,350)
 		}):Play()
 		
+		-- tombol balik jadi minimize
 		btnMin.Text = "-"
 	end
 end)
@@ -617,9 +637,8 @@ RunService.RenderStepped:Connect(function()
 		end
 	end
 end)
-
 -- ==============================
--- AIM
+-- AIMBOT PAGE FULL
 -- ==============================
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -704,6 +723,7 @@ RunService.RenderStepped:Connect(function()
 	end
 end)
 
+-- AUTO UPDATE PLAYER MASUK
 game.Players.PlayerAdded:Connect(function(plr)
 	plr.CharacterAdded:Connect(function()
 		if espEnabled then
